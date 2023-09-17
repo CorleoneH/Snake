@@ -1,3 +1,8 @@
+'''
+1. 使用空格键SPACE暂停游戏
+2. 使用回车键RETURN开启游戏
+'''
+
 
 import random
 import sys
@@ -14,7 +19,9 @@ class Snack:
         pygame.init()
         pygame.display.set_caption("贪吃蛇")
         self.screen = pygame.display.set_mode((self.settings.width, self.settings.height))
+        self.clock = pygame.time.Clock()
         self.totalScore = 0
+        self.isPause = True
 
         # 初始化食物
         self.food = [(random.randint(self.settings.gridX[0], self.settings.gridX[1] - 1), random.randint(self.settings.gridY[0], self.settings.gridY[1] - 1))]
@@ -40,9 +47,9 @@ class Snack:
         for y in range (self.settings.gameAreaY[0], self.settings.gameAreaY[1], self.settings.unit):
             pygame.draw.line(self.screen, self.settings.BLACK, (self.settings.gameAreaX[0], y), (self.settings.gameAreaX[1], y), self.settings.lineWidth)
 
-        font = pygame.font.SysFont("SimHei", 24, bold=True)
+        font = pygame.font.SysFont(self.settings.fontSimHei, 24, bold=True)
         self.screen.blit(font.render(f"Score: {self.totalScore}", True, self.settings.LIGHT, self.settings.BLACK), (self.settings.unit * 2, self.settings.unit // 2))
-        self.screen.blit(font.render(f"Speed: {self.settings.speed / 1000}s", True, self.settings.LIGHT, self.settings.BLACK), (self.settings.width - self.settings.unit * 8, self.settings.unit // 2))
+        self.screen.blit(font.render(f"Speed: {self.settings.speed}fps", True, self.settings.LIGHT, self.settings.BLACK), (self.settings.width - self.settings.unit * 8, self.settings.unit // 2))
 
         # 绘制初始化的食物
         self.drawRects(self.settings.RED, self.food)
@@ -66,23 +73,38 @@ class Snack:
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
-                elif event.type == pygame.KEYDOWN:
-                    if event.key in (pygame.K_UP, pygame.K_w) and self.dir != (0, 1):
-                        self.dir = (0, -1)
-                    elif event.key in (pygame.K_DOWN, pygame.K_s) and self.dir != (0, -1):
-                        self.dir = (0, 1)
-                    elif event.key in (pygame.K_LEFT, pygame.K_a) and self.dir != (1, 0):
-                        self.dir = (-1, 0)
-                    elif event.key in (pygame.K_RIGHT, pygame.K_d) and self.dir != (-1, 0):
-                        self.dir = (1, 0)
+                pygame.event.pump()
+                keys = pygame.key.get_pressed()
+                if keys[K_UP] and self.dir != (0, 1):
+                    self.dir = (0, -1)
+                if keys[K_DOWN] and self.dir != (0, -1):
+                    self.dir = (0, 1)
+                if keys[K_LEFT] and self.dir != (1, 0):
+                    self.dir = (-1, 0)
+                if keys[K_RIGHT] and self.dir != (-1, 0):
+                    self.dir = (1, 0)
+                if keys[K_SPACE]:
+                    self.isPause = True
+                if keys[K_RETURN]:
+                    self.isPause = False
 
-            # 移动蛇
-            newHead = (self.snakes[0][0] + self.dir[0], self.snakes[0][1] + self.dir[1])
-            self.snakes.insert(0, newHead)
+            if not self.isPause:
+                # 移动蛇
+                newHead = (self.snakes[0][0] + self.dir[0], self.snakes[0][1] + self.dir[1])
+                self.snakes.insert(0, newHead)
 
+
+                # 如果蛇头碰到了食物，则加分，且再随机生成一个食物
+                if self.snakes[0] == self.food[0]:
+                    self.totalScore += self.settings.score
+                    self.food = [(random.randint(self.settings.gridX[0], self.settings.gridX[1] - 1), random.randint(self.settings.gridY[0], self.settings.gridY[1] - 1))]
+                # 如果舌头没有碰到食物，且没有Game Over,则pop列表尾部，以获取蛇前进一步的效果
+                else:
+                    self.snakes.pop()
+                
             if self.isGameOver():
                 # 在屏幕中央显示Game Over!!!
-                font = pygame.font.SysFont("SimHei", 72, bold=True)
+                font = pygame.font.SysFont(self.settings.fontComicsansms, 72, bold=True)
                 fontWidth, fontHeight = font.size("Game Over!!!")
                 gameOverX = (self.settings.gameAreaX[1] - self.settings.gameAreaX[0] - fontWidth) // 2
                 gameOverY = (self.settings.gameAreaY[1] - self.settings.gameAreaY[0] - fontHeight) // 2
@@ -93,16 +115,10 @@ class Snack:
                 time.sleep(1)
                 pygame.quit()
                 sys.exit()
-            elif self.snakes[0] == self.food[0]:
-                self.totalScore += self.settings.score
-                self.food = [(random.randint(self.settings.gridX[0], self.settings.gridX[1] - 1), random.randint(self.settings.gridY[0], self.settings.gridY[1] - 1))]
-            else:
-                self.snakes.pop()
-            
             self.fillBackgournd()
-            
+                
             pygame.display.flip()
-            pygame.time.delay(self.settings.speed)
+            self.clock.tick(self.settings.speed)
  
 def main():
     snack = Snack()
