@@ -12,7 +12,7 @@ class Settings:
         self.score = 10
 
         # 设置速度
-        self.speed = 200
+        self.speed = 5
         
         self.lineWidth = 1
         
@@ -23,3 +23,7 @@ class Settings:
         self.RED = (200, 30, 30)
         self.BLUE = (20, 20, 230)
         self.DARK = (50, 50, 50)
+
+        # 设置字体
+        self.fontComicsansms = "comicsansms"
+        self.fontSimHei = "SimHei"
