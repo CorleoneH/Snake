@@ -12,7 +12,7 @@ class Settings:
         self.score = 10
 
         # 设置速度
-        self.speed = 5
+        self.speed = 4
         
         self.lineWidth = 1
         

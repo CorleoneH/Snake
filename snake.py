@@ -1,16 +1,16 @@
 '''
 1. 使用空格键SPACE暂停游戏
-2. 使用回车键RETURN开启游戏
+2. 使用回车键RETURN开启游戏，开启时游戏处于暂停状态
+3. 根据分数区间，设置不同的游戏速度和单个食物的得分
+4. 由于按键延迟，为了降低game over。随机生成的新食物，不会在边界
 '''
-
 
 import random
 import sys
-import os
 import time
 import pygame
 from pygame.locals import *
-from collections import deque
+#from collections import deque
 from settings import Settings
 
 class Snack:
@@ -97,7 +97,7 @@ class Snack:
                 # 如果蛇头碰到了食物，则加分，且再随机生成一个食物
                 if self.snakes[0] == self.food[0]:
                     self.totalScore += self.settings.score
-                    self.food = [(random.randint(self.settings.gridX[0], self.settings.gridX[1] - 1), random.randint(self.settings.gridY[0], self.settings.gridY[1] - 1))]
+                    self.food = [(random.randint(self.settings.gridX[0] + 1, self.settings.gridX[1] - 2), random.randint(self.settings.gridY[0] + 1, self.settings.gridY[1] - 2))]
                 # 如果舌头没有碰到食物，且没有Game Over,则pop列表尾部，以获取蛇前进一步的效果
                 else:
                     self.snakes.pop()
@@ -118,6 +118,24 @@ class Snack:
             self.fillBackgournd()
                 
             pygame.display.flip()
+            if self.totalScore >= 40 and self.totalScore < 100:
+                self.settings.speed = 6
+                self.settings.score = 15
+            elif self.totalScore >= 100 and self.totalScore < 200:
+                self.settings.speed = 8
+                self.settings.score = 20
+            elif self.totalScore >= 200 and self.totalScore < 400:
+                self.settings.speed = 10
+                self.settings.score = 25
+            elif self.totalScore >= 400 and self.totalScore < 700:
+                self.settings.speed = 12
+                self.settings.score = 30
+            elif self.totalScore >= 700 and self.totalScore < 1100:
+                self.settings.speed = 15
+                self.settings.score = 40
+            elif self.totalScore >= 1100 and self.totalScore < 1500:
+                self.settings.speed = 20
+                self.settings.score = 50
             self.clock.tick(self.settings.speed)
  
 def main():
